@@ -1,0 +1,86 @@
+version: '3.8'
+
+# ============================================================
+# Daka Technical Assessment — Docker Compose (Desarrollo)
+# Stack: NestJS + Next.js 14 + PostgreSQL
+# ============================================================
+
+services:
+
+  db:
+    image: postgres:17-alpine
+    container_name: nest-next-db
+    environment:
+      POSTGRES_USER:     ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB:       ${DATABASE_NAME}
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────────────────
+  # Backend — NestJS + MikroORM
+  # Estado: ⚠️  TODO — Configurar por el candidato
+  # ──────────────────────────────────────────────────────────
+  backend:
+    # TODO 1: build context y stage del Dockerfile
+    # build:
+    #   context: ./backend
+    #   dockerfile: Dockerfile
+    #   target: development
+
+    # TODO 2: Volúmenes para hot-reload
+    # volumes:
+    #   - ./backend:/app
+    #   - /app/node_modules
+
+    # TODO 3: Puerto y variables de entorno
+    # ports:
+    #   - "3000:3000"
+    # environment:
+    #   NODE_ENV:          development
+    #   DATABASE_HOST:     db
+    #   DATABASE_PORT:     ${DATABASE_PORT:-5432}
+    #   DATABASE_USER:     ${DATABASE_USER}
+    #   DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+    #   DATABASE_NAME:     ${DATABASE_NAME}
+    #   JWT_SECRET:        ${JWT_SECRET}
+
+    depends_on:
+      db:
+        condition: service_started  # TODO: Cambiar a service_healthy
+
+  # ──────────────────────────────────────────────────────────
+  # Frontend — Next.js 14
+  # Estado: ⚠️  TODO — Completar configuración
+  # ──────────────────────────────────────────────────────────
+  frontend:
+    # TODO: Completar. Recuerda que Next.js necesita NEXT_PUBLIC_API_URL
+    # para que el browser pueda llamar al backend.
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: nest-next-frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3001:3000"
+    environment:
+      NODE_ENV: development
+      # TODO: Definir NEXT_PUBLIC_API_URL apuntando al backend
+      # NEXT_PUBLIC_API_URL: http://localhost:3000
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
