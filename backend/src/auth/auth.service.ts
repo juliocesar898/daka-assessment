@@ -35,7 +35,7 @@ export class AuthService {
     return { message: 'Usuario registrado exitosamente' };
   }
 
-  async login(loginDto: LoginDto): Promise<{ access_token: string }> {
+  async login(loginDto: LoginDto): Promise<{ access_token: string, user: User }> {
     const { username, password } = loginDto;
 
     const user = await this.userRepository.findOne({ username });
@@ -51,7 +51,7 @@ export class AuthService {
     const payload = { username: user.username, sub: user.id };
     const access_token = this.jwtService.sign(payload);
 
-    return { access_token };
+    return { access_token, user };
   }
 
   getProfile(user: any) {

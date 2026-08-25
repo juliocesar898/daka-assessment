@@ -36,9 +36,13 @@ export class PokemonService {
       }
 
       const data = await response.json();
+
+      const animatedUrl =
+        data.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default
+        || data.sprites.front_default;
       const sprite: PokemonSprite = {
         id: Date.now(),
-        url: data.sprites.front_default,
+        url: animatedUrl,
         name: data.name,
       };
 

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Clip main sphere to fit inside border -->
+    <clipPath id="ballClip">
+      <circle cx="250" cy="250" r="236" />
+    </clipPath>
+    <!-- Shadow clip for bottom region -->
+    <clipPath id="bottomClip">
+      <path d="M 14,250 A 236,236 0 0,0 486,250 Z" />
+    </clipPath>
+  </defs>
+
+  <!-- Outer Main Circle with stroke -->
+  <circle cx="250" cy="250" r="236" fill="#EE352E" stroke="#231F20" stroke-width="14" />
+
+  <!-- Ball Content inside clip -->
+  <g clip-path="url(#ballClip)">
+    
+    <!-- Bottom Half White Base -->
+    <path d="M 0,250 A 250,250 0 0,0 500,250 Z" fill="#FFFFFF" />
+
+    <!-- Bottom Left Shadow Overlay -->
+    <path d="M 14,250 A 236,236 0 0,0 380,455 C 230,440 100,350 14,250 Z" fill="#929497" />
+
+    <!-- Top Left Gloss/Highlight -->
+    <ellipse cx="148" cy="135" rx="50" ry="40" fill="#FFFFFF" transform="rotate(-35 148 135)" />
+
+    <!-- Central Horizontal Dark Band (Gray with top/bottom outlines implicitly handled or drawn explicitly) -->
+    <!-- Curved dark belt path crossing center -->
+    <path d="M -10,230 Q 250,290 510,230 L 510,270 Q 250,330 -10,270 Z" fill="#414042" />
+
+    <!-- Outer Center Button Ring Base (Gray ring extending out) -->
+    <circle cx="270" cy="235" r="62" fill="#414042" stroke="#231F20" stroke-width="10" />
+
+    <!-- Black Stroke outlines for the belt bands -->
+    <path d="M 0,225 Q 250,285 500,225" fill="none" stroke="#231F20" stroke-width="10" />
+    <path d="M 0,275 Q 250,335 500,275" fill="none" stroke="#231F20" stroke-width="10" />
+
+    <!-- Inner Button Structure -->
+    <circle cx="270" cy="235" r="62" fill="#414042" stroke="#231F20" stroke-width="10" />
+    <circle cx="270" cy="235" r="42" fill="#FFFFFF" stroke="#231F20" stroke-width="8" />
+
+  </g>
+
+  <!-- Outer Border Reinforcement -->
+  <circle cx="250" cy="250" r="236" fill="none" stroke="#231F20" stroke-width="14" />
+</svg>
