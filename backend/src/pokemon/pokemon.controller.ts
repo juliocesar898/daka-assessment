@@ -17,8 +17,11 @@ export class PokemonController {
         return this.pokemonService.findAll();
     }
 
+    @Get('random')
+    @ApiOperation({ summary: 'Get a random pokemon sprite' })
+    @ApiResponse({ status: 200, description: 'Returns random pokemon sprite.' })
     async getRandom() {
-        return { url: await this.pokemonService.getRandomSprite() };
+        return this.pokemonService.getRandomSprite();
     }
 
     @Delete('all')
@@ -27,7 +30,6 @@ export class PokemonController {
     removeAll() {
         return this.pokemonService.removeAll();
     }
-
 
     @Delete(':id')
     @ApiOperation({ summary: 'Delete a pokemon sprite' })

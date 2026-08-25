@@ -1,51 +1,62 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadGatewayException, NotFoundException } from '@nestjs/common';
+
+export interface PokemonSprite {
+  id: number;
+  url: string;
+  name: string;
+}
 
 @Injectable()
 export class PokemonService {
-  // TODO: Definir estructura para almacenar sprites
-  // Puedes usar un array en memoria o considerar usar una base de datos
-  // Ejemplo: private sprites: PokemonSprite[] = [];
+  private sprites: PokemonSprite[] = [];
 
-  // TODO: Implementar método getRandomSprite()
-  // Requisitos:
-  // 1. Generar ID aleatorio entre 1 y 898
-  // 2. Hacer request a PokeAPI: https://pokeapi.co/api/v2/pokemon/{id}
-  // 3. Extraer sprite URL (sprites.front_default) y nombre (name)
-  // 4. Manejar errores con try/catch apropiadamente
-  // 5. Si PokeAPI falla, lanzar BadGatewayException con mensaje user-friendly
-  // 6. Retornar objeto { id: timestamp, url: string, name: string }
-  // 7. Opcionalmente: Almacenar el sprite en memoria
-  async getRandomSprite(): Promise<any> {
-    // TODO: Implementar integración con PokeAPI
-    throw new Error('Method not implemented - Complete PokeAPI integration');
+  async getRandomSprite(): Promise<PokemonSprite> {
+    const randomId = Math.floor(Math.random() * 898) + 1;
+
+    try {
+      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
+      if (!response.ok) {
+        throw new Error(`PokeAPI status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const sprite: PokemonSprite = {
+        id: Date.now(),
+        url: data.sprites.front_default,
+        name: data.name,
+      };
+
+      this.sprites.push(sprite);
+      return sprite;
+    } catch (error) {
+      throw new BadGatewayException('Error al comunicarse con PokeAPI. Intente nuevamente.');
+    }
   }
 
-  // HINT: Puedes necesitar estos métodos para gestionar sprites
-  create(dto: any) {
-    // TODO: Implementar si necesitas crear sprites manualmente
+  findAll(): PokemonSprite[] {
+    return this.sprites;
   }
 
-  findAll() {
-    // TODO: Retornar todos los sprites almacenados
-    return [];
-  }
-
-  findOne(id: number) {
-    // TODO: Buscar sprite por ID
-    return null;
-  }
-
-  update(id: number, dto: any) {
-    // TODO: Actualizar sprite si es necesario
+  findOne(id: number): PokemonSprite {
+    const sprite = this.sprites.find((s) => s.id === id);
+    if (!sprite) {
+      throw new NotFoundException(`Sprite con ID ${id} no encontrado`);
+    }
+    return sprite;
   }
 
   remove(id: number) {
-    // TODO: Eliminar sprite por ID
+    const index = this.sprites.findIndex((s) => s.id === id);
+    if (index === -1) {
+      throw new NotFoundException(`Sprite con ID ${id} no encontrado`);
+    }
+    this.sprites.splice(index, 1);
     return { deleted: true, id };
   }
 
   removeAll() {
-    // TODO: Limpiar todos los sprites
-    return { deleted: true, count: 0 };
+    const count = this.sprites.length;
+    this.sprites = [];
+    return { deleted: true, count };
   }
 }
