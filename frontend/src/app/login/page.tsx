@@ -44,56 +44,59 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="max-w-sm w-full bg-white rounded-2xl border border-slate-200/80 shadow-sm p-8 space-y-6">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 bg-tech-pattern p-4">
+      <div className="max-w-sm w-full bg-white rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] p-8 space-y-6 relative overflow-hidden">
+
+        {/* Accent Bar Superior */}
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-amber-400 to-blue-600" />
 
         <BrandLogo />
 
         <div className="text-center space-y-1">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">Iniciar sesión</h2>
-          <p className="text-xs text-slate-500">Ingresa tus credenciales para continuar</p>
+          <h2 className="text-xl font-bold tracking-tight text-slate-900">Iniciar sesión</h2>
+          <p className="text-xs font-medium text-slate-500">Ingresa tus credenciales para continuar</p>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50/80 border border-red-200/60 text-red-600 rounded-lg text-xs font-medium">
+          <div className="p-3 bg-red-50 border-2 border-red-500 text-red-700 rounded-xl text-xs font-semibold shadow-[2px_2px_0px_0px_rgba(239,68,68,1)]">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Usuario</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Usuario</label>
             <input
               {...register('username')}
               placeholder="julioflores"
-              className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 text-slate-900 transition-all placeholder:text-slate-400"
+              className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border-2 border-slate-900 rounded-xl focus:outline-none focus:bg-white focus:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] text-slate-900 transition-all placeholder:text-slate-400 font-medium"
             />
-            {errors.username && <p className="text-red-500 text-[11px] mt-1">{errors.username.message}</p>}
+            {errors.username && <p className="text-red-600 font-medium text-[11px] mt-1">{errors.username.message}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Contraseña</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Contraseña</label>
             <input
               type="password"
               {...register('password')}
               placeholder="••••••••"
-              className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 text-slate-900 transition-all placeholder:text-slate-400"
+              className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border-2 border-slate-900 rounded-xl focus:outline-none focus:bg-white focus:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] text-slate-900 transition-all placeholder:text-slate-400 font-medium"
             />
-            {errors.password && <p className="text-red-500 text-[11px] mt-1">{errors.password.message}</p>}
+            {errors.password && <p className="text-red-600 font-medium text-[11px] mt-1">{errors.password.message}</p>}
           </div>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/20 active:scale-[0.99] transition-all disabled:opacity-50"
+            className="w-full bg-slate-900 text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-800 border-2 border-slate-900 shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50"
           >
             {isSubmitting ? 'Ingresando...' : 'Iniciar Sesión'}
           </button>
         </form>
 
-        <p className="text-xs text-center text-slate-500">
+        <p className="text-xs text-center text-slate-600 font-medium">
           ¿No tienes cuenta?{' '}
-          <Link href="/register" className="text-slate-900 font-medium hover:underline">
+          <Link href="/register" className="text-blue-600 font-bold hover:underline">
             Regístrate
           </Link>
         </p>
