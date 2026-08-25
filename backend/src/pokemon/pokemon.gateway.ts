@@ -25,7 +25,7 @@ export class PokemonGateway implements OnGatewayConnection, OnGatewayDisconnect 
   constructor(
     private readonly pokemonService: PokemonService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
   async handleConnection(client: Socket) {
     try {
@@ -53,8 +53,8 @@ export class PokemonGateway implements OnGatewayConnection, OnGatewayDisconnect 
   @SubscribeMessage('request-sprite')
   async handleRequestSprite(client: Socket) {
     try {
-      const sprite = await this.pokemonService.getRandomSprite();
-      // Emitimos el Pokémon generado de vuelta al cliente
+      const userId = client.data.user.sub || client.data.user.id;
+      const sprite = await this.pokemonService.getRandomSprite(userId);
       client.emit('sprite-served', sprite);
     } catch (error) {
       client.emit('pokemon-error', {
@@ -63,11 +63,11 @@ export class PokemonGateway implements OnGatewayConnection, OnGatewayDisconnect 
     }
   }
 
-  // 🗑️ DISPARADOR MANUAL: Escucha cuando el frontend borra un sprite
   @SubscribeMessage('delete-sprite')
   handleDeleteSprite(client: Socket, payload: { id: number }) {
     try {
-      this.pokemonService.remove(payload.id);
+      const userId = client.data.user.sub || client.data.user.id;
+      this.pokemonService.remove(userId, payload.id);
     } catch (error) {
       this.logger.warn(`Sprite no encontrado para eliminar: ${payload.id}`);
     }

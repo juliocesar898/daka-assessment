@@ -1,4 +1,4 @@
-import { Injectable, BadGatewayException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadGatewayException, NotFoundException, BadRequestException } from '@nestjs/common';
 
 export interface PokemonSprite {
   id: number;
@@ -8,10 +8,26 @@ export interface PokemonSprite {
 
 @Injectable()
 export class PokemonService {
-  private sprites: PokemonSprite[] = [];
+  private userSprites: Map<number, PokemonSprite[]> = new Map();
 
-  async getRandomSprite(): Promise<PokemonSprite> {
-    const randomId = Math.floor(Math.random() * 898) + 1;
+  async getRandomSprite(userId: number): Promise<PokemonSprite> {
+    const userList = this.userSprites.get(userId) || [];
+
+    if (userList.length >= 30) {
+      throw new BadRequestException('Has alcanzado el límite máximo de 30 Pokémon. Elimina alguno para solicitar más.');
+    }
+
+    let randomId: number;
+    let spriteUrl: string;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    // Generar ID evitando que la URL del sprite ya exista en la lista del usuario
+    do {
+      randomId = Math.floor(Math.random() * 898) + 1;
+      spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${randomId}.png`;
+      attempts++;
+    } while (userList.some((s) => s.url === spriteUrl) && attempts < maxAttempts);
 
     try {
       const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
@@ -26,37 +42,35 @@ export class PokemonService {
         name: data.name,
       };
 
-      this.sprites.push(sprite);
+      userList.push(sprite);
+      this.userSprites.set(userId, userList);
+
       return sprite;
     } catch (error) {
+      if (error instanceof BadRequestException) throw error;
       throw new BadGatewayException('Error al comunicarse con PokeAPI. Intente nuevamente.');
     }
   }
 
-  findAll(): PokemonSprite[] {
-    return this.sprites;
+  findAll(userId: number): PokemonSprite[] {
+    return this.userSprites.get(userId) || [];
   }
 
-  findOne(id: number): PokemonSprite {
-    const sprite = this.sprites.find((s) => s.id === id);
-    if (!sprite) {
-      throw new NotFoundException(`Sprite con ID ${id} no encontrado`);
-    }
-    return sprite;
-  }
-
-  remove(id: number) {
-    const index = this.sprites.findIndex((s) => s.id === id);
+  remove(userId: number, id: number) {
+    const userList = this.userSprites.get(userId) || [];
+    const index = userList.findIndex((s) => s.id === id);
     if (index === -1) {
       throw new NotFoundException(`Sprite con ID ${id} no encontrado`);
     }
-    this.sprites.splice(index, 1);
+    userList.splice(index, 1);
+    this.userSprites.set(userId, userList);
     return { deleted: true, id };
   }
 
-  removeAll() {
-    const count = this.sprites.length;
-    this.sprites = [];
+  removeAll(userId: number) {
+    const userList = this.userSprites.get(userId) || [];
+    const count = userList.length;
+    this.userSprites.set(userId, []);
     return { deleted: true, count };
   }
 }
