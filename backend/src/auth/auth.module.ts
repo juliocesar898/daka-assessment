@@ -12,17 +12,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   imports: [
     MikroOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    /**
-     * ⚠️  TODO (Candidato — OWASP A02 / A07):
-     *   1. El JWT_SECRET NUNCA debe tener un fallback hardcodeado.
-     *   2. Usa ConfigService.getOrThrow() para lanzar error si no está definido.
-     *   3. Define una expiración apropiada para tokens de acceso (< 15 min en prod).
-     */
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'change-me-in-env', // TODO: usar getOrThrow
+        secret: configService.getOrThrow<string>('JWT_SECRET'),
         signOptions: { expiresIn: '1h' },
       }),
     }),
@@ -32,4 +26,3 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}
-

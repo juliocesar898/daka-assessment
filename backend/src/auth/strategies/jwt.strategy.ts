@@ -6,32 +6,24 @@ import { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor(
-        configService: ConfigService,
-        private readonly authService: AuthService,
-    ) {
-        // TODO: Completar configuración de JWT Strategy
-        // Requisitos:
-        // 1. Obtener el secret desde ConfigService
-        // 2. Validar que el secret exista (lanzar error si no)
-        // 3. No usar fallback hardcodeado ('secretKey' es inseguro)
-        const secret = configService.get<string>('JWT_SECRET');
+  constructor(
+    configService: ConfigService,
+    private readonly authService: AuthService,
+  ) {
+    const secret = configService.getOrThrow<string>('JWT_SECRET');
 
-        super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            ignoreExpiration: false,
-            secretOrKey: secret || 'secretKey',  // TODO: Eliminar fallback y validar secret
-        });
-    }
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: secret,
+    });
+  }
 
-    // TODO: Completar método validate
-    // Requisitos:
-    // 1. Extraer userId del payload (payload.sub)
-    // 2. Buscar usuario en base de datos usando authService.getUserById()
-    // 3. Si no existe, lanzar UnauthorizedException
-    // 4. Retornar el usuario encontrado
-    async validate(payload: any) {
-        // TODO: Implementar validación del JWT payload
-        throw new Error('Method not implemented - Complete JWT validation');
+  async validate(payload: any) {
+    const user = await this.authService.getUserById(payload.sub);
+    if (!user) {
+      throw new UnauthorizedException('Token no válido o usuario inexistente');
     }
+    return user;
+  }
 }
