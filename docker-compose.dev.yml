@@ -15,7 +15,7 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB:       ${DATABASE_NAME}
     ports:
-      - "${DATABASE_PORT:-5432}:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -24,46 +24,45 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    networks:
+      - daka_network
 
   # ──────────────────────────────────────────────────────────
-  # Backend — NestJS + MikroORM
-  # Estado: ⚠️  TODO — Configurar por el candidato
+  # Backend — NestJS
+  # Estado: ✅ Configurado
   # ──────────────────────────────────────────────────────────
   backend:
-    # TODO 1: build context y stage del Dockerfile
-    # build:
-    #   context: ./backend
-    #   dockerfile: Dockerfile
-    #   target: development
-
-    # TODO 2: Volúmenes para hot-reload
-    # volumes:
-    #   - ./backend:/app
-    #   - /app/node_modules
-
-    # TODO 3: Puerto y variables de entorno
-    # ports:
-    #   - "3000:3000"
-    # environment:
-    #   NODE_ENV:          development
-    #   DATABASE_HOST:     db
-    #   DATABASE_PORT:     ${DATABASE_PORT:-5432}
-    #   DATABASE_USER:     ${DATABASE_USER}
-    #   DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-    #   DATABASE_NAME:     ${DATABASE_NAME}
-    #   JWT_SECRET:        ${JWT_SECRET}
-
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: nest-next-backend
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV:          development
+      DATABASE_HOST:     db
+      DATABASE_PORT:     ${DATABASE_PORT:-5432}
+      DATABASE_USER:     ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME:     ${DATABASE_NAME}
+      JWT_SECRET:        ${JWT_SECRET}
+      PORT:              3000
+      FRONTEND_URL:      http://localhost:3001
     depends_on:
       db:
-        condition: service_started  # TODO: Cambiar a service_healthy
+        condition: service_healthy
+    networks:
+      - daka_network
 
   # ──────────────────────────────────────────────────────────
   # Frontend — Next.js 14
-  # Estado: ⚠️  TODO — Completar configuración
+  # Estado: ✅ Configurado
   # ──────────────────────────────────────────────────────────
   frontend:
-    # TODO: Completar. Recuerda que Next.js necesita NEXT_PUBLIC_API_URL
-    # para que el browser pueda llamar al backend.
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -77,10 +76,16 @@ services:
       - "3001:3000"
     environment:
       NODE_ENV: development
-      # TODO: Definir NEXT_PUBLIC_API_URL apuntando al backend
-      # NEXT_PUBLIC_API_URL: http://localhost:3000
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NEXT_PUBLIC_WS_URL: http://localhost:3000
     depends_on:
       - backend
+    networks:
+      - daka_network
 
 volumes:
   postgres_data:
+
+networks:
+  daka_network:
+    driver: bridge
