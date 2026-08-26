@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # 🗄️ Base de Datos PostgreSQL (Producción / Test)
+  # 🗄️ Base de Datos
   postgres:
     image: postgres:17-alpine
     container_name: dakatest_db_prod
@@ -18,7 +18,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # ⚙️ Backend NestJS (Target Production)
+  # ⚙️ Backend NestJS
   backend:
     build:
       context: ./backend
@@ -26,6 +26,8 @@ services:
       target: production
     container_name: dakatest_backend_prod
     restart: always
+    ports:
+      - "3000:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -35,7 +37,7 @@ services:
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DATABASE_NAME: ${POSTGRES_DB:-dakatest_db}
       JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key_daka}
-      FRONTEND_URL: http://localhost
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
     depends_on:
       postgres:
         condition: service_healthy
@@ -43,7 +45,7 @@ services:
       - internal_network
       - public_network
 
-  # 🎨 Frontend Next.js (Target Runner / Production)
+  # 🎨 Frontend Next.js
   frontend:
     build:
       context: ./frontend
@@ -55,7 +57,7 @@ services:
       - "80:3000"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
     depends_on:
       - backend
     networks:
