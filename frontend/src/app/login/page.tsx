@@ -9,8 +9,9 @@ import Link from 'next/link';
 import api from '@/lib/axios';
 import { useAppStore } from '@/store/useAppStore';
 import BrandLogo from '@/components/BrandLogo';
+import { AuthInput } from '@/components/AuthInput';
+import { AuthAlert } from '@/components/AuthAlert';
 
-// 🛡️ Esquema Zod de Login con validación fina
 const loginSchema = z.object({
   username: z.string().min(1, 'El nombre de usuario es requerido'),
   password: z.string().min(1, 'La contraseña es requerida'),
@@ -55,17 +56,13 @@ function LoginContent() {
       setAuth(userRes.data, access_token);
       router.push('/dashboard');
     } catch (err: any) {
-      // 🛡️ OWASP: Mensaje genérico para no revelar si falló el usuario o la contraseña
       setError(err.response?.data?.message || 'Credenciales inválidas');
     }
   };
 
   return (
     <div className="max-w-sm w-full bg-white rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] p-8 space-y-6 relative overflow-hidden">
-
-      {/* Accent Bar Superior */}
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-amber-400 to-blue-600" />
-
       <BrandLogo />
 
       <div className="text-center space-y-1">
@@ -73,59 +70,23 @@ function LoginContent() {
         <p className="text-xs font-medium text-slate-500">Ingresa tus credenciales para continuar</p>
       </div>
 
-      {/* Alerta de Éxito / Registro */}
-      {infoMsg && (
-        <div className="p-3 bg-emerald-50 border-2 border-emerald-500 text-emerald-800 rounded-xl text-xs font-semibold shadow-[2px_2px_0px_0px_rgba(16,185,129,1)]">
-          {infoMsg}
-        </div>
-      )}
-
-      {/* Alerta de Error / Expiración */}
-      {error && (
-        <div className="p-3 bg-red-50 border-2 border-red-500 text-red-700 rounded-xl text-xs font-semibold shadow-[2px_2px_0px_0px_rgba(239,68,68,1)]">
-          {error}
-        </div>
-      )}
+      {infoMsg && <AuthAlert type="success" message={infoMsg} />}
+      {error && <AuthAlert type="error" message={error} />}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-            Usuario
-          </label>
-          <input
-            {...register('username')}
-            placeholder="julioflores"
-            className={`w-full px-3.5 py-2.5 text-sm bg-slate-50 border-2 rounded-xl focus:outline-none transition-all placeholder:text-slate-400 font-medium ${errors.username
-                ? 'border-red-500 bg-red-50/30 focus:shadow-[2px_2px_0px_0px_rgba(239,68,68,1)]'
-                : 'border-slate-900 focus:bg-white focus:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)]'
-              }`}
-          />
-          {errors.username && (
-            <p className="text-red-600 font-medium text-[11px] mt-1">
-              {errors.username.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-            Contraseña
-          </label>
-          <input
-            type="password"
-            {...register('password')}
-            placeholder="••••••••"
-            className={`w-full px-3.5 py-2.5 text-sm bg-slate-50 border-2 rounded-xl focus:outline-none transition-all placeholder:text-slate-400 font-medium ${errors.password
-                ? 'border-red-500 bg-red-50/30 focus:shadow-[2px_2px_0px_0px_rgba(239,68,68,1)]'
-                : 'border-slate-900 focus:bg-white focus:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)]'
-              }`}
-          />
-          {errors.password && (
-            <p className="text-red-600 font-medium text-[11px] mt-1">
-              {errors.password.message}
-            </p>
-          )}
-        </div>
+        <AuthInput
+          label="Usuario"
+          placeholder="username"
+          {...register('username')}
+          error={errors.username?.message}
+        />
+        <AuthInput
+          label="Contraseña"
+          type="password"
+          placeholder="••••••••"
+          {...register('password')}
+          error={errors.password?.message}
+        />
 
         <button
           type="submit"

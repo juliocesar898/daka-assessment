@@ -7,13 +7,6 @@ import { AuthModule } from './auth/auth.module';
 import { PokemonModule } from './pokemon/pokemon.module';
 import mikroOrmConfig from './config/mikro-orm.config';
 
-/**
- * AppModule — Módulo raíz de la aplicación
- *
- * ⚠️  TODO (Candidato): La configuración actual usa forRoot() con valores estáticos.
- *     ¿Qué ventaja tendría usar forRootAsync() con ConfigService en su lugar?
- *     Hint: variables de entorno cargadas dinámicamente en runtime vs. build time.
- */
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -25,4 +18,3 @@ import mikroOrmConfig from './config/mikro-orm.config';
   providers: [AppService],
 })
 export class AppModule {}
-
