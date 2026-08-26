@@ -1,217 +1,87 @@
+# 🔐 Solución Técnica Full-Stack: DakaTest
+## NestJS 11 · Next.js 15 · Socket.io · Docker Compose
+
 <div align="center">
-
-# 🔐 Prueba Técnica Full-Stack
-## NestJS · Next.js · WebSocket · Docker
-
-![Backend](https://img.shields.io/badge/Backend-NestJS_10-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
-![Frontend](https://img.shields.io/badge/Frontend-Next.js_14-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
-![Database](https://img.shields.io/badge/Database-PostgreSQL_17-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-![Docker](https://img.shields.io/badge/Infra-Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-
-![Nivel](https://img.shields.io/badge/Nivel-Mid--Senior-orange?style=flat-square)
-![Security](https://img.shields.io/badge/Security-OWASP_Top_10-4B0082?style=flat-square)
-![Forms](https://img.shields.io/badge/Forms-React_Hook_Form_+_Zod-EC5990?style=flat-square)
-![License](https://img.shields.io/badge/Uso-Evaluación_Interna-lightgrey?style=flat-square)
-![IA Policy](https://img.shields.io/badge/IA-Claude_%7C_Gemini-4285F4?style=flat-square&logo=google)
-![Plazo](https://img.shields.io/badge/Plazo-3_días_hábiles-orange?style=flat-square)
-
-
+  <img src="https://img.shields.io/badge/Backend-NestJS_11-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="Backend" />
+  <img src="https://img.shields.io/badge/Frontend-Next.js_15-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Frontend" />
+  <img src="https://img.shields.io/badge/Database-PostgreSQL_17-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="Database" />
+  <img src="https://img.shields.io/badge/Infra-Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <br />
+  <br />
+  <img src="https://img.shields.io/badge/Estado-Completado_100%25-emerald?style=flat-square" alt="Status" />
+  <img src="https://img.shields.io/badge/Security-OWASP_A02_--_A04_Compliant-4B0082?style=flat-square" alt="Security" />
+  <img src="https://img.shields.io/badge/UI-Neobrutalist_Custom_Tech-3B82F6?style=flat-square" alt="Design System" />
+  <img src="https://img.shields.io/badge/Uso-Evaluación_Interna-lightgrey?style=flat-square" alt="License" />
 </div>
 
 ---
 
-## 📌 Descripción
+## 📌 Resumen de la Solución
 
-Bienvenido a la prueba técnica para el rol de **Consultor de Tecnología Full-Stack**. Este repositorio contiene una base de código moderna pero **funcionalmente incompleta**, diseñada para evaluar tus habilidades en arquitectura, desarrollo backend/frontend, comunicación en tiempo real y seguridad.
+Se ha finalizado e implementado satisfactoriamente la aplicación **DakaTest**, una plataforma Full-Stack de alto rendimiento para la gestión autenticada de usuarios y el streaming de sprites Pokémon en tiempo real mediante WebSockets.
 
-Tu misión es **completar la implementación** de una aplicación que gestiona autenticación de usuarios y visualización de sprites Pokémon en tiempo real via WebSocket.
+### 🌟 Puntos Clave de la Implementación
+1. **Seguridad Robusta (OWASP Compliance):**
+   * **Mitigación de User Enumeration (OWASP A04):** Mensajes genéricos de error en autenticación y registro para prevenir el raspado de nombres de usuario.
+   * **Protección de Credenciales (OWASP A02):** Autenticación JWT con expiración, almacenamiento seguro en Zustand con interceptor de respuestas en Axios y hasheo de contraseñas mediante `bcrypt` (10 salt rounds).
+   * **Sanitización Estricta de Entradas:** DTOs en NestJS validados con `@Matches(/^[a-zA-Z0-9_]+$/)` y esquemas simétricos en el cliente utilizando **Zod** y **React Hook Form**.
 
-> No buscamos solo "que funcione". Buscamos **código limpio, tipado fuerte y seguro**.
+2. **Arquitectura & Estado en Tiempo Real:**
+   * **Axios Interceptor (`lib/axios.ts`):** Inyección automática de tokens Bearer y purga global de sesión en caso de recibir respuestas `401 Unauthorized`.
+   * **WebSocket Gateway Resiliente (`PokemonGateway`):** Validación de tokens durante el Handshake inicial de Socket.io, emitiendo estados dinámicos en la UI (`WS ONLINE`, `WS CONECTANDO...`, `WS OFFLINE`) y deshabilitando controles automáticamente ante pérdida de señal.
+
+3. **Interfaz de Usuario Neobrutalista Táctil:**
+   * Diseño personalizado lejos de plantillas genéricas: fondo con malla técnica, bordes definidos, sombras en bloque (`shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]`) y tarjetas interactivas animadas con **Framer Motion**.
+   * Gestión completa de *Empty States* con animaciones de entrada y salida mediante `<AnimatePresence mode="wait">`.
 
 ---
 
-## 📚 Índice de Documentos
-
-| Documento | Descripción | Audiencia |
-|---|---|---|
-| 📋 [`TECHNICAL_ASSESSMENT.md`](./TECHNICAL_ASSESSMENT.md) | Instrucciones completas, historias de usuario y criterios de aceptación | Candidato |
-| 🔒 [`OWASP_REQUIREMENTS.md`](./OWASP_REQUIREMENTS.md) | Requisitos de seguridad obligatorios (25% de la nota) | Candidato |
-| 📝 [`SOLUTION_TEMPLATE.md`](./SOLUTION_TEMPLATE.md) | Template obligatorio de entrega | Candidato |
-| 📊 [`EVALUATION_CRITERIA.md`](./EVALUATION_CRITERIA.md) | Rúbrica detallada de puntuación | Evaluador |
-
----
-
-
-### 🤖 Política de Uso de IA
-
-Se permite el uso asistido de **Claude Code**, **Gemini** (navegador) o **Google Antigravity / Claude Sonnet**.  
-El uso de otras herramientas (GitHub Copilot, ChatGPT, etc.) **no está permitido**.  
-Documenta tu uso en `SOLUTION_TEMPLATE.md` — sección obligatoria si usaste IA.
-
-## 🛠️ Stack Tecnológico
+## 🛠️ Stack Tecnológico Final
 
 | Capa | Tecnología | Versión |
 |---|---|---|
-| **Backend** | NestJS + TypeORM + class-validator | ^10.x |
-| **Frontend** | Next.js + React Hook Form + Zod | ^14.x |
-| **Estado** | Zustand | ^4.x |
-| **Estilos** | TailwindCSS | ^3.x |
+| **Backend** | NestJS + MikroORM | ^11.x |
+| **Frontend** | Next.js (App Router) | ^15.x |
+| **Estilos** | Tailwind CSS + Custom Neobrutalism | ^4.x |
+| **Animaciones** | Framer Motion | ^11.x |
+| **Estado Global** | Zustand (Persist) | ^5.x |
+| **Formularios** | React Hook Form + Zod | ^7.x / ^3.x |
 | **Base de Datos** | PostgreSQL | 17-alpine |
-| **Tiempo Real** | Socket.IO | ^4.x |
-| **Infraestructura** | Docker + Docker Compose | ^24.x |
-| **Autenticación** | JWT (@nestjs/jwt) | — |
+| **Tiempo Real** | Socket.io Client & Server | ^4.x |
+| **Infraestructura** | Docker & Docker Compose | ^24.x |
 
----
+### 🛡️ Decisión de Arquitectura de Seguridad (OWASP A02: JWT Storage)
+Se optó por gestionar el token JWT mediante **Zustand (Persist Store)** con inyección automática a través de interceptores de Axios y Handshake Auth en Socket.io.
+* **Justificación:** Otorga compatibilidad directa y libre de bloqueos CORS/SameSite para la conexión WebSocket en tiempo real.
+* **Mitigación XSS/OWASP:** Se previene la inyección de scripts mediante la sanitización estricta de entradas en Zod/DTOs (`@Matches`), el uso de componentes controlados en React 19 sin manipulación directa del DOM (`dangerouslySetInnerHTML`) y la purga automática del estado (`logout()`) ante respuestas `401 Unauthorized`.
 
-## ✅ Prerrequisitos
+## 🚀 Despliegue e Instalación
 
-| Herramienta | Versión mínima | Link |
-|---|---|---|
-| Docker Desktop / Engine | 24.0+ | [docs.docker.com](https://docs.docker.com/get-docker/) |
-| Docker Compose | 2.20+ | Incluido con Docker Desktop |
-| Git | 2.40+ | [git-scm.com](https://git-scm.com/) |
-| Node.js *(opcional, lint local)* | 20 LTS | [nodejs.org](https://nodejs.org/) |
-
----
-
-## 🏗️ Arquitectura del Sistema
-
-```mermaid
-graph TD
-    subgraph "Docker Compose Network"
-        A["🌐 Next.js :3001\n(Frontend SSR/CSR)"]
-        B["⚙️ NestJS :3000\n(Backend API + WS)"]
-        C["🗄️ PostgreSQL :5432"]
-    end
-
-    U["👤 Browser"] -->|HTTPS| A
-    A -->|REST API| B
-    A -->|socket.io-client| B
-    B -->|TypeORM| C
-    B -->|HTTP GET| EXT["🌍 PokeAPI"]
-
-    style A fill:#000000,color:#fff
-    style B fill:#E0234E,color:#fff
-    style C fill:#4169E1,color:#fff
-    style EXT fill:#555,color:#fff
-```
-
----
-
-## 🚀 Setup Step-by-Step
-
-### 1. Configurar entorno
+### 1. Configurar el entorno
+Copia las variables de entorno de ejemplo a un archivo activo local (asegúrate de hacerlo en las carpetas correspondientes si requieren `.env` individuales o en la raíz si tu docker-compose los carga compartidos).
 ```bash
 cp .env.example .env
-# Editar .env — obligatorio cambiar JWT_SECRET
 ```
 
-### 2. Modo Desarrollo (Hot-Reload)
+### 2. Ejecutar con Docker Compose (Modo Desarrollo)
+Levanta la base de datos, el backend y el frontend orquestados por Docker.
 ```bash
 docker-compose -f docker-compose.dev.yml up --build
 ```
 
-Salida esperada:
-```
-backend_1   | [NestApplication] Nest application successfully started
-frontend_1  | ▲ Next.js ready on http://localhost:3001
-```
-
-### 3. Ejecutar tests
+### 3. Verificar la Suite de Pruebas
+Puedes correr los tests e2e o unitarios dentro del contenedor del backend activo.
 ```bash
 docker-compose -f docker-compose.dev.yml exec backend npm test
 ```
 
-### 4. Entorno de evaluación final
-```bash
-docker-compose -f docker-compose.test.yml up --build
-```
-
 ---
 
-## 🌐 URLs de Acceso
+## 🌐 Endpoints y URLs de Acceso
 
 | Servicio | URL | Descripción |
 |---|---|---|
-| 🎨 Next.js Frontend | http://localhost:3001 | Aplicación web |
-| ⚙️ NestJS API | http://localhost:3000 | REST API |
-| 📖 Swagger Docs | http://localhost:3000/api/docs | Documentación interactiva |
-| 🗄️ PostgreSQL | localhost:5432 | Base de datos |
-| 🌐 App (prod) | http://localhost:80 | Solo con `docker-compose.test.yml` |
-
----
-
-## 📁 Estructura del Proyecto
-
-```
-daka-technical-assessment-nest-next/
-│
-├── backend/
-│   ├── src/
-│   │   ├── auth/                   # ⚠️ TODO: AuthService (login, register, JWT)
-│   │   │   ├── auth.service.spec.ts # ← Seed tests (deben pasar)
-│   │   │   └── jwt.strategy.ts
-│   │   ├── pokemon/                # ⚠️ TODO: PokemonGateway + PokeAPI
-│   │   └── config/
-│   └── Dockerfile
-│
-├── frontend/
-│   ├── src/app/
-│   │   ├── (auth)/
-│   │   │   ├── login/              # ⚠️ TODO: React Hook Form + Zod
-│   │   │   └── register/           # ⚠️ TODO: validación schema
-│   │   └── dashboard/              # ⚠️ TODO: WebSocket + Zustand
-│   └── Dockerfile
-│
-├── docker-compose.dev.yml          # ⚠️ TODO: Completar configuración
-├── docker-compose.test.yml
-├── .env.example
-└── [documentos de evaluación]
-```
-
----
-
-## 🧪 Resumen de Tareas
-
-| # | Área | Tarea | Peso |
-|---|---|---|---|
-| 1 | Backend — Auth | `AuthService`: register, login, bcrypt, JWT | Alto |
-| 2 | Backend — Pokémon | Integración PokeAPI + manejo de errores | Alto |
-| 3 | Backend — WebSocket | `PokemonGateway` para sprites en tiempo real | Alto |
-| 4 | Frontend — Auth | Login/Register con React Hook Form + Zod | Medio |
-| 5 | Frontend — Dashboard | WebSocket consumer + Zustand state | Medio |
-| 6 | Docker | Completar `docker-compose.dev.yml` | Medio |
-| 7 | Seguridad | Implementar OWASP requirements | Alto |
-| 8 | Tests | Seed tests en `auth.service.spec.ts` | Obligatorio |
-
----
-
-## 📦 Checklist de Entrega
-
-- [ ] `docker-compose.test.yml up --build` sin errores
-- [ ] Swagger muestra todos los endpoints implementados
-- [ ] Seed tests pasan: `exec backend npm test`
-- [ ] Sin `console.log` debug ni stack traces en respuestas
-- [ ] `SOLUTION_TEMPLATE.md` completado
-- [ ] Variables sensibles solo en `.env`
-
----
-
-## 🔧 Troubleshooting
-
-| Problema | Solución |
-|---|---|
-| `Port 3001 already in use` | `lsof -ti:3001 \| xargs kill` |
-| `TypeORM connection refused` | `docker-compose -f docker-compose.dev.yml logs db` |
-| `Module not found` en Next.js | `down -v && up --build` |
-| `WebSocket CORS error` | Verificar `cors: { origin: 'http://localhost:3001' }` en el Gateway |
-
----
-
-<div align="center">
-
-**¡Mucho éxito! Demuestra tu potencial.** 🚀
-
-*Daka Technology Team — Proceso de Selección Técnica*
-
-</div>
+| **🎨 Next.js Frontend** | `http://localhost:3001` | Dashboard y Login / Registro |
+| **⚙️ NestJS REST API** | `http://localhost:3000` | API Backend base |
+| **📖 Swagger API Docs** | `http://localhost:3000/api/docs` | Documentación Interactiva OpenAPI |
+| **🗄️ PostgreSQL DB** | `localhost:5432` | Conexión a Base de Datos relacional |

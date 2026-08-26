@@ -31,6 +31,8 @@ export class PokemonGateway implements OnGatewayConnection, OnGatewayDisconnect 
     try {
       const authHeader = client.handshake.auth?.token || client.handshake.headers?.authorization;
       if (!authHeader) {
+        this.logger.warn(`Connection attempt rejected: No token provided (${client.id})`);
+        client.emit('pokemon-error', { message: 'Token no proporcionado' });
         client.disconnect();
         return;
       }
@@ -40,7 +42,8 @@ export class PokemonGateway implements OnGatewayConnection, OnGatewayDisconnect 
       client.data.user = payload;
       this.logger.log(`Client connected: ${client.id} (User: ${payload.username})`);
     } catch (err) {
-      this.logger.error(`Unauthorized connection attempt: ${client.id}`);
+      this.logger.error(`Unauthorized WS connection attempt: ${client.id}`);
+      client.emit('pokemon-error', { message: 'Sesión expirada o token inválido' });
       client.disconnect();
     }
   }
@@ -49,10 +52,13 @@ export class PokemonGateway implements OnGatewayConnection, OnGatewayDisconnect 
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  // 🖱️ DISPARADOR MANUAL: Escucha el clic del botón en el frontend
   @SubscribeMessage('request-sprite')
   async handleRequestSprite(client: Socket) {
     try {
+      if (!client.data?.user) {
+        client.emit('pokemon-error', { message: 'Usuario no autenticado' });
+        return;
+      }
       const userId = client.data.user.sub || client.data.user.id;
       const sprite = await this.pokemonService.getRandomSprite(userId);
       client.emit('sprite-served', sprite);
@@ -66,6 +72,7 @@ export class PokemonGateway implements OnGatewayConnection, OnGatewayDisconnect 
   @SubscribeMessage('delete-sprite')
   handleDeleteSprite(client: Socket, payload: { id: number }) {
     try {
+      if (!client.data?.user) return;
       const userId = client.data.user.sub || client.data.user.id;
       this.pokemonService.remove(userId, payload.id);
     } catch (error) {

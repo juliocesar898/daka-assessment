@@ -20,7 +20,7 @@ export class AuthService {
 
     const existingUser = await this.userRepository.findOne({ username });
     if (existingUser) {
-      throw new ConflictException('El nombre de usuario ya está registrado');
+      throw new ConflictException('No se pudo completar el registro con los datos ingresados');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
