@@ -32,7 +32,7 @@ export class PokemonGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const authHeader = client.handshake.auth?.token || client.handshake.headers?.authorization;
       if (!authHeader) {
         this.logger.warn(`Connection attempt rejected: No token provided (${client.id})`);
-        client.emit('pokemon-error', { message: 'Token no proporcionado' });
+        client.emit('pokemon-error', { message: 'Token not provided' });
         client.disconnect();
         return;
       }
@@ -43,7 +43,7 @@ export class PokemonGateway implements OnGatewayConnection, OnGatewayDisconnect 
       this.logger.log(`Client connected: ${client.id} (User: ${payload.username})`);
     } catch (err) {
       this.logger.error(`Unauthorized WS connection attempt: ${client.id}`);
-      client.emit('pokemon-error', { message: 'Sesión expirada o token inválido' });
+      client.emit('pokemon-error', { message: 'Session expired or invalid token' });
       client.disconnect();
     }
   }
@@ -56,7 +56,7 @@ export class PokemonGateway implements OnGatewayConnection, OnGatewayDisconnect 
   async handleRequestSprite(client: Socket) {
     try {
       if (!client.data?.user) {
-        client.emit('pokemon-error', { message: 'Usuario no autenticado' });
+        client.emit('pokemon-error', { message: 'User not authenticated' });
         return;
       }
       const userId = client.data.user.sub || client.data.user.id;
@@ -64,7 +64,7 @@ export class PokemonGateway implements OnGatewayConnection, OnGatewayDisconnect 
       client.emit('sprite-served', sprite);
     } catch (error) {
       client.emit('pokemon-error', {
-        message: (error as Error).message || 'Error al obtener el sprite',
+        message: (error as Error).message || 'Error fetching sprite',
       });
     }
   }
@@ -76,7 +76,7 @@ export class PokemonGateway implements OnGatewayConnection, OnGatewayDisconnect 
       const userId = client.data.user.sub || client.data.user.id;
       this.pokemonService.remove(userId, payload.id);
     } catch (error) {
-      this.logger.warn(`Sprite no encontrado para eliminar: ${payload.id}`);
+      this.logger.warn(`Sprite not found for deletion: ${payload.id}`);
     }
   }
 }

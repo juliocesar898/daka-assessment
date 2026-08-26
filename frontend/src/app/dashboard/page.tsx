@@ -140,14 +140,13 @@ export default function DashboardPage() {
             >
               Request Sprite
             </button>
-            {sprites.length > 0 && (
-              <button
-                onClick={handleDeleteAll}
-                className="bg-white border-2 border-slate-900 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-100 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
-              >
-                Limpiar Todo ({sprites.length})
-              </button>
-            )}
+            <button
+              onClick={handleDeleteAll}
+              disabled={sprites.length === 0}
+              className="bg-white border-2 border-slate-900 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-100 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:border-slate-400 disabled:bg-slate-50/50"
+            >
+              Limpiar Todo ({sprites.length})
+            </button>
           </div>
         </div>
 

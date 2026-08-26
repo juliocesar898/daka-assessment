@@ -14,7 +14,7 @@ export class PokemonService {
     const userList = this.userSprites.get(userId) || [];
 
     if (userList.length >= 30) {
-      throw new BadRequestException('Has alcanzado el límite máximo de 30 Pokémon. Elimina alguno para solicitar más.');
+      throw new BadRequestException('You have reached the maximum limit of 30 Pokémon. Delete some to request more.');
     }
 
     let randomId: number;
@@ -22,7 +22,7 @@ export class PokemonService {
     let attempts = 0;
     const maxAttempts = 10;
 
-    // Generar ID evitando que la URL del sprite ya exista en la lista del usuario
+    // Generate ID making sure the sprite URL does not already exist in the user's list
     do {
       randomId = Math.floor(Math.random() * 898) + 1;
       spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${randomId}.png`;
@@ -52,7 +52,7 @@ export class PokemonService {
       return sprite;
     } catch (error) {
       if (error instanceof BadRequestException) throw error;
-      throw new BadGatewayException('Error al comunicarse con PokeAPI. Intente nuevamente.');
+      throw new BadGatewayException('Error communicating with PokeAPI. Please try again.');
     }
   }
 
@@ -64,7 +64,7 @@ export class PokemonService {
     const userList = this.userSprites.get(userId) || [];
     const index = userList.findIndex((s) => s.id === id);
     if (index === -1) {
-      throw new NotFoundException(`Sprite con ID ${id} no encontrado`);
+      throw new NotFoundException(`Sprite with ID ${id} not found`);
     }
     userList.splice(index, 1);
     this.userSprites.set(userId, userList);

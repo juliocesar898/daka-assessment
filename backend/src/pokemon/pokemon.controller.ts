@@ -11,21 +11,21 @@ export class PokemonController {
   constructor(private readonly pokemonService: PokemonService) { }
 
   @Get()
-  @ApiOperation({ summary: 'Get all stored pokemons for current user' })
+  @ApiOperation({ summary: 'Get all stored pokemons' })
   @ApiResponse({ status: 200, description: 'Returns list of user pokemons.' })
   findAll(@Request() req: any) {
     return this.pokemonService.findAll(req.user.id);
   }
 
   @Get('random')
-  @ApiOperation({ summary: 'Get a random pokemon sprite' })
+  @ApiOperation({ summary: 'Get a random pokemon' })
   @ApiResponse({ status: 200, description: 'Returns random pokemon sprite.' })
   async getRandom(@Request() req: any) {
     return this.pokemonService.getRandomSprite(req.user.id);
   }
 
   @Delete('all')
-  @ApiOperation({ summary: 'Delete all pokemons for current user' })
+  @ApiOperation({ summary: 'Delete all pokemons' })
   @ApiResponse({ status: 200, description: 'All user pokemons deleted.' })
   removeAll(@Request() req: any) {
     return this.pokemonService.removeAll(req.user.id);
