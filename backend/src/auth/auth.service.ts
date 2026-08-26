@@ -59,9 +59,9 @@ export class AuthService {
   }
 
   async getUserById(id: number): Promise<Omit<User, 'password'> | null> {
-    const user = await this.userRepository.findOne({ id } as any);
+    const user = await this.userRepository.findOne({ id } as User);
     if (user) {
-      const { password, ...result } = user as any;
+      const { password, ...result } = user;
       return result;
     }
     return null;
