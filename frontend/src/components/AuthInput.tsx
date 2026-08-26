@@ -46,7 +46,7 @@ export const AuthInput = React.forwardRef<HTMLInputElement, AuthInputProps>(
               aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
             >
               {showPassword ? (
-                /* Contraseña visible -> Ícono Ojo Abierto (Acción: Ocultar) */
+                /* Contraseña visible */
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -67,7 +67,7 @@ export const AuthInput = React.forwardRef<HTMLInputElement, AuthInputProps>(
                   />
                 </svg>
               ) : (
-                /* Contraseña oculta -> Ícono Ojo Tachado (Acción: Mostrar) */
+                /* Contraseña oculta */
                 <svg
                   className="w-4 h-4"
                   fill="none"
