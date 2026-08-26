@@ -15,7 +15,12 @@ CMD ["npm", "run", "dev"]
 # STAGE 3 - Builder
 FROM base AS builder
 COPY . .
+
 ENV NEXT_TELEMETRY_DISABLED 1
+
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 RUN npm run build
 
 # STAGE 4 - Production Server (Runner)

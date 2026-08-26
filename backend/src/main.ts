@@ -16,19 +16,15 @@ async function bootstrap() {
     logger.warn(`Could not auto-synchronize schema: ${(error as Error).message}`);
   }
 
-  const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:3001';
+  const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost';
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (
-        !origin ||
-        origin === allowedOrigin ||
-        origin.startsWith(allowedOrigin) ||
-        origin.includes('192.241.148.227')
-      ) {
+      if (!origin || origin === allowedOrigin || origin.startsWith(allowedOrigin)) {
         callback(null, true);
       } else {
-        callback(null, true);
+        // Rechazo estricto para orígenes desconocidos (OWASP)
+        callback(new Error('Not allowed by CORS'));
       }
     },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
