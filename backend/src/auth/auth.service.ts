@@ -20,7 +20,7 @@ export class AuthService {
 
     const existingUser = await this.userRepository.findOne({ username });
     if (existingUser) {
-      throw new ConflictException('No se pudo completar el registro con los datos ingresados');
+      throw new ConflictException('Registration could not be completed with the provided data');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,7 +32,7 @@ export class AuthService {
 
     await this.userRepository.insert(user);
 
-    return { message: 'Usuario registrado exitosamente' };
+    return { message: 'User registered successfully' };
   }
 
   async login(loginDto: LoginDto): Promise<{ access_token: string, user: User }> {
@@ -40,12 +40,12 @@ export class AuthService {
 
     const user = await this.userRepository.findOne({ username });
     if (!user) {
-      throw new UnauthorizedException('Credenciales inválidas');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Credenciales inválidas');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const payload = { username: user.username, sub: user.id };

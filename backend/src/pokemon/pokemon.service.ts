@@ -17,43 +17,51 @@ export class PokemonService {
       throw new BadRequestException('You have reached the maximum limit of 30 Pokémon. Delete some to request more.');
     }
 
-    let randomId: number;
-    let spriteUrl: string;
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    // Generate ID making sure the sprite URL does not already exist in the user's list
-    do {
-      randomId = Math.floor(Math.random() * 898) + 1;
-      spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${randomId}.png`;
-      attempts++;
-    } while (userList.some((s) => s.url === spriteUrl) && attempts < maxAttempts);
+    const randomId = this.generateUniqueRandomId(userList);
 
     try {
-      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
-      if (!response.ok) {
-        throw new Error(`PokeAPI status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      const animatedUrl =
-        data.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default
-        || data.sprites.front_default;
-      const sprite: PokemonSprite = {
-        id: Date.now(),
-        url: animatedUrl,
-        name: data.name,
-      };
+      const sprite = await this.fetchPokemonSprite(randomId);
 
       userList.push(sprite);
       this.userSprites.set(userId, userList);
 
       return sprite;
     } catch (error) {
-      if (error instanceof BadRequestException) throw error;
       throw new BadGatewayException('Error communicating with PokeAPI. Please try again.');
     }
+  }
+
+  private generateUniqueRandomId(userList: PokemonSprite[]): number {
+    const maxAttempts = 10;
+    let attempts = 0;
+    let randomId: number;
+    let spriteUrl: string;
+
+    do {
+      randomId = Math.floor(Math.random() * 898) + 1;
+      spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${randomId}.png`;
+      attempts++;
+    } while (userList.some((s) => s.url === spriteUrl) && attempts < maxAttempts);
+
+    return randomId;
+  }
+
+  private async fetchPokemonSprite(pokemonId: number): Promise<PokemonSprite> {
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+    if (!response.ok) {
+      throw new Error(`PokeAPI status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const animatedUrl =
+      data.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default ||
+      data.sprites.front_default;
+
+    return {
+      id: Date.now(),
+      url: animatedUrl,
+      name: data.name,
+    };
   }
 
   findAll(userId: number): PokemonSprite[] {
