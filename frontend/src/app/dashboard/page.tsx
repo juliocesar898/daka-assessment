@@ -7,10 +7,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useAppStore, PokemonSprite } from '@/store/useAppStore';
 import api from '@/lib/axios';
 
+type WsStatus = 'CONNECTING' | 'CONNECTED' | 'DISCONNECTED';
+
 export default function DashboardPage() {
   const router = useRouter();
   const socketRef = useRef<Socket | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [wsStatus, setWsStatus] = useState<WsStatus>('CONNECTING');
 
   const { token, user, sprites, setSprites, addSprite, removeSprite, clearSprites, logout } = useAppStore();
 
@@ -35,11 +38,28 @@ export default function DashboardPage() {
       .then((res) => setSprites(res.data))
       .catch(() => { });
 
+    // 🔌 Conexión con Socket.io
     const socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000', {
       auth: { token: `Bearer ${token}` },
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
     socketRef.current = socket;
+
+    socket.on('connect', () => {
+      setWsStatus('CONNECTED');
+      setErrorMsg(null);
+    });
+
+    socket.on('disconnect', () => {
+      setWsStatus('DISCONNECTED');
+    });
+
+    socket.on('connect_error', () => {
+      setWsStatus('DISCONNECTED');
+      setErrorMsg('Error de conexión en tiempo real con el servidor');
+    });
 
     socket.on('sprite-served', (sprite: PokemonSprite) => {
       addSprite(sprite);
@@ -57,7 +77,7 @@ export default function DashboardPage() {
 
   const handleRequestSprite = () => {
     setErrorMsg(null);
-    if (socketRef.current) {
+    if (socketRef.current && wsStatus === 'CONNECTED') {
       socketRef.current.emit('request-sprite');
     }
   };
@@ -66,7 +86,7 @@ export default function DashboardPage() {
     try {
       await api.delete(`/pokemon/${id}`);
       removeSprite(id);
-      if (socketRef.current) {
+      if (socketRef.current && wsStatus === 'CONNECTED') {
         socketRef.current.emit('delete-sprite', { id });
       }
     } catch (err) {
@@ -89,13 +109,23 @@ export default function DashboardPage() {
       <header className="border-b-2 border-slate-900 bg-white/95 backdrop-blur-md sticky top-0 z-20 shadow-sm">
         <div className="max-w-5xl mx-auto px-6 py-3 flex justify-between items-center">
 
-          {/* Badge de Estado en Vivo */}
-          <div className="flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-300 rounded-full">
+          {/* Badge de Estado del WebSocket */}
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full border transition-all ${wsStatus === 'CONNECTED'
+              ? 'bg-emerald-50 border-emerald-300'
+              : wsStatus === 'CONNECTING'
+                ? 'bg-amber-50 border-amber-300'
+                : 'bg-red-50 border-red-300'
+            }`}>
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${wsStatus === 'CONNECTED' ? 'bg-emerald-400' : wsStatus === 'CONNECTING' ? 'bg-amber-400' : 'bg-red-400'
+                }`} />
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${wsStatus === 'CONNECTED' ? 'bg-emerald-500' : wsStatus === 'CONNECTING' ? 'bg-amber-500' : 'bg-red-500'
+                }`} />
             </span>
-            <h1 className="text-[11px] font-mono font-bold tracking-wider text-emerald-800 uppercase">WS ONLINE</h1>
+            <h1 className={`text-[11px] font-mono font-bold tracking-wider uppercase ${wsStatus === 'CONNECTED' ? 'text-emerald-800' : wsStatus === 'CONNECTING' ? 'text-amber-800' : 'text-red-800'
+              }`}>
+              {wsStatus === 'CONNECTED' ? 'WS ONLINE' : wsStatus === 'CONNECTING' ? 'WS CONECTANDO...' : 'WS OFFLINE'}
+            </h1>
           </div>
 
           {/* Datos del usuario */}
@@ -141,7 +171,8 @@ export default function DashboardPage() {
           <div className="flex gap-2">
             <button
               onClick={handleRequestSprite}
-              className="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider border-2 border-slate-900 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+              disabled={wsStatus !== 'CONNECTED'}
+              className="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider border-2 border-slate-900 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
             >
               Request Sprite
             </button>
@@ -156,7 +187,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* State Transition */}
+        {/* Transición entre Empty State y Grid */}
         <AnimatePresence mode="wait">
           {sprites.length === 0 ? (
             <motion.div

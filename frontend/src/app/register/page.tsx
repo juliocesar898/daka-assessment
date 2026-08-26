@@ -10,8 +10,14 @@ import api from '@/lib/axios';
 import BrandLogo from '@/components/BrandLogo';
 
 const registerSchema = z.object({
-  username: z.string().min(3, 'El usuario debe tener al menos 3 caracteres'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  username: z
+    .string()
+    .min(3, 'El usuario debe tener al menos 3 caracteres')
+    .max(20, 'El usuario no puede exceder 20 caracteres')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Solo se permiten letras, números y guiones bajos'),
+  password: z
+    .string()
+    .min(6, 'La contraseña debe tener al menos 6 caracteres'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Las contraseñas no coinciden',
@@ -24,7 +30,11 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterFormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
 
@@ -36,9 +46,14 @@ export default function RegisterPage() {
         password: data.password,
         confirmPassword: data.confirmPassword,
       });
-      router.push('/login');
+      router.push('/login?registered=true');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al registrar el usuario');
+      // 🛡️ OWASP A04: Mensaje genérico para evitar la enumeración de usuarios
+      if (err.response?.status === 409) {
+        setError('No se pudo completar el registro.');
+      } else {
+        setError(err.response?.data?.message || 'Error al procesar el registro');
+      }
     }
   };
 
@@ -64,35 +79,62 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Usuario</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Usuario
+            </label>
             <input
               {...register('username')}
               placeholder="julioflores"
-              className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border-2 border-slate-900 rounded-xl focus:outline-none focus:bg-white focus:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] text-slate-900 transition-all placeholder:text-slate-400 font-medium"
+              className={`w-full px-3.5 py-2.5 text-sm bg-slate-50 border-2 rounded-xl focus:outline-none transition-all placeholder:text-slate-400 font-medium ${errors.username
+                  ? 'border-red-500 bg-red-50/30 focus:shadow-[2px_2px_0px_0px_rgba(239,68,68,1)]'
+                  : 'border-slate-900 focus:bg-white focus:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)]'
+                }`}
             />
-            {errors.username && <p className="text-red-600 font-medium text-[11px] mt-1">{errors.username.message}</p>}
+            {errors.username && (
+              <p className="text-red-600 font-medium text-[11px] mt-1">
+                {errors.username.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Contraseña</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Contraseña
+            </label>
             <input
               type="password"
               {...register('password')}
               placeholder="••••••••"
-              className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border-2 border-slate-900 rounded-xl focus:outline-none focus:bg-white focus:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] text-slate-900 transition-all placeholder:text-slate-400 font-medium"
+              className={`w-full px-3.5 py-2.5 text-sm bg-slate-50 border-2 rounded-xl focus:outline-none transition-all placeholder:text-slate-400 font-medium ${errors.password
+                  ? 'border-red-500 bg-red-50/30 focus:shadow-[2px_2px_0px_0px_rgba(239,68,68,1)]'
+                  : 'border-slate-900 focus:bg-white focus:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)]'
+                }`}
             />
-            {errors.password && <p className="text-red-600 font-medium text-[11px] mt-1">{errors.password.message}</p>}
+            {errors.password && (
+              <p className="text-red-600 font-medium text-[11px] mt-1">
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Confirmar Contraseña</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Confirmar Contraseña
+            </label>
             <input
               type="password"
               {...register('confirmPassword')}
               placeholder="••••••••"
-              className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border-2 border-slate-900 rounded-xl focus:outline-none focus:bg-white focus:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] text-slate-900 transition-all placeholder:text-slate-400 font-medium"
+              className={`w-full px-3.5 py-2.5 text-sm bg-slate-50 border-2 rounded-xl focus:outline-none transition-all placeholder:text-slate-400 font-medium ${errors.confirmPassword
+                  ? 'border-red-500 bg-red-50/30 focus:shadow-[2px_2px_0px_0px_rgba(239,68,68,1)]'
+                  : 'border-slate-900 focus:bg-white focus:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)]'
+                }`}
             />
-            {errors.confirmPassword && <p className="text-red-600 font-medium text-[11px] mt-1">{errors.confirmPassword.message}</p>}
+            {errors.confirmPassword && (
+              <p className="text-red-600 font-medium text-[11px] mt-1">
+                {errors.confirmPassword.message}
+              </p>
+            )}
           </div>
 
           <button

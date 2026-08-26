@@ -1,4 +1,10 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+
+export interface User {
+  id: number;
+  username: string;
+}
 
 export interface PokemonSprite {
   id: number;
@@ -6,56 +12,47 @@ export interface PokemonSprite {
   name: string;
 }
 
-interface User {
-  id: number;
-  username: string;
-}
-
 interface AppState {
-  user: User | null;
   token: string | null;
+  user: User | null;
   sprites: PokemonSprite[];
   setAuth: (user: User, token: string) => void;
-  logout: () => void;
   setSprites: (sprites: PokemonSprite[]) => void;
   addSprite: (sprite: PokemonSprite) => void;
   removeSprite: (id: number) => void;
   clearSprites: () => void;
+  logout: () => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
-  user: null,
-  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
-  sprites: [],
-
-  setAuth: (user, token) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('token', token);
-    }
-    set({ user, token });
-  },
-
-  logout: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-    }
-    set({ user: null, token: null, sprites: [] });
-  },
-
-  setSprites: (sprites) => set({ sprites }),
-
-  addSprite: (sprite) =>
-    set((state) => {
-      if (state.sprites.some((s) => s.id === sprite.id || s.url === sprite.url)) {
-        return state;
-      }
-      return { sprites: [sprite, ...state.sprites] };
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      token: null,
+      user: null,
+      sprites: [],
+      setAuth: (user, token) => set({ user, token }),
+      setSprites: (sprites) => set({ sprites }),
+      addSprite: (sprite) =>
+        set((state) => ({
+          sprites: state.sprites.some((s) => s.id === sprite.id)
+            ? state.sprites
+            : [sprite, ...state.sprites],
+        })),
+      removeSprite: (id) =>
+        set((state) => ({
+          sprites: state.sprites.filter((s) => s.id !== id),
+        })),
+      clearSprites: () => set({ sprites: [] }),
+      logout: () => {
+        set({ token: null, user: null, sprites: [] });
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('app-storage');
+        }
+      },
     }),
-
-  removeSprite: (id) =>
-    set((state) => ({
-      sprites: state.sprites.filter((s) => s.id !== id),
-    })),
-
-  clearSprites: () => set({ sprites: [] }),
-}));
+    {
+      name: 'app-storage',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
